@@ -25,7 +25,7 @@ if [[ -z $(pactl list short | grep spotify.monitor) ]]; then
 fi
 
 # Move Spotify sound output back to default at exit
-pasink=$(pactl stat | grep Sink | cut -d: -f2)
+pasink=$(pacmd stat | grep "Default sink name" | cut -d: -f2)
 trap 'pactl move-sink-input $spotify $pasink' EXIT
 
 # Move Spotify to its own sink so recorded output will not get corrupted
@@ -59,7 +59,7 @@ do
     echo "RECORDING"
     parec -d spotify.monitor | oggenc -b 192 -o tmp.ogg --raw - 2>/dev/null\
       &disown
-    trap 'pactl move-sink-input $spotify $pasink && killall oggenc && killall parec' EXIT
+    trap 'pactl move-sink-input $spotify $pasink && killall oggenc && killall parec && pacmd set-default-sink $pasink' EXIT
 
   else
     variant=$(echo "$line"|cut -d= -f1)
